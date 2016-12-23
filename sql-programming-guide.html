@@ -1333,8 +1333,8 @@ tuples or lists in the RDD created in the step 1.</li>
 
 <h2 id="aggregations">Aggregations</h2>
 
-<p>The <a href="api/scala/index.html#org.apache.spark.sql.functions$">built-in DataFrames functions</a> mentioned 
-before provide such common aggregations as <code>count()</code>, <code>countDistinct()</code>, <code>avg()</code>, <code>max()</code>, <code>min()</code>, etc.
+<p>The <a href="api/scala/index.html#org.apache.spark.sql.functions$">built-in DataFrames functions</a> provide common
+aggregations such as <code>count()</code>, <code>countDistinct()</code>, <code>avg()</code>, <code>max()</code>, <code>min()</code>, etc.
 While those functions are designed for DataFrames, Spark SQL also has type-safe versions for some of them in 
 <a href="api/scala/index.html#org.apache.spark.sql.expressions.scalalang.typed$">Scala</a> and 
 <a href="api/java/org/apache/spark/sql/expressions/javalang/typed.html">Java</a> to work with strongly typed Datasets.
@@ -1548,7 +1548,11 @@ For example, a type-safe user-defined average can look like:</p>
     <span class="n">buffer</span>
   <span class="o">}</span>
   <span class="c1">// Merge two intermediate values</span>
-  <span class="k">def</span> <span class="n">merge</span><span class="o">(</span><span class="n">b1</span><span class="k">:</span> <span class="kt">Average</span><span class="o">,</span> <span class="n">b2</span><span class="k">:</span> <span class="kt">Average</span><span class="o">)</span><span class="k">:</span> <span class="kt">Average</span> <span class="o">=</span> <span class="nc">Average</span><span class="o">(</span><span class="n">b1</span><span class="o">.</span><span class="n">sum</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="n">sum</span><span class="o">,</span> <span class="n">b1</span><span class="o">.</span><span class="n">count</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="n">count</span><span class="o">)</span>
+  <span class="k">def</span> <span class="n">merge</span><span class="o">(</span><span class="n">b1</span><span class="k">:</span> <span class="kt">Average</span><span class="o">,</span> <span class="n">b2</span><span class="k">:</span> <span class="kt">Average</span><span class="o">)</span><span class="k">:</span> <span class="kt">Average</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="n">b1</span><span class="o">.</span><span class="n">sum</span> <span class="o">+=</span> <span class="n">b2</span><span class="o">.</span><span class="n">sum</span>
+    <span class="n">b1</span><span class="o">.</span><span class="n">count</span> <span class="o">+=</span> <span class="n">b2</span><span class="o">.</span><span class="n">count</span>
+    <span class="n">b1</span>
+  <span class="o">}</span>
   <span class="c1">// Transform the output of the reduction</span>
   <span class="k">def</span> <span class="n">finish</span><span class="o">(</span><span class="n">reduction</span><span class="k">:</span> <span class="kt">Average</span><span class="o">)</span><span class="k">:</span> <span class="kt">Double</span> <span class="o">=</span> <span class="n">reduction</span><span class="o">.</span><span class="n">sum</span><span class="o">.</span><span class="n">toDouble</span> <span class="o">/</span> <span class="n">reduction</span><span class="o">.</span><span class="n">count</span>
   <span class="c1">// Specifies the Encoder for the intermediate value type</span>
@@ -1624,9 +1628,11 @@ For example, a type-safe user-defined average can look like:</p>
   <span class="o">}</span>
   <span class="c1">// Merge two intermediate values</span>
   <span class="kd">public</span> <span class="n">Average</span> <span class="nf">merge</span><span class="o">(</span><span class="n">Average</span> <span class="n">b1</span><span class="o">,</span> <span class="n">Average</span> <span class="n">b2</span><span class="o">)</span> <span class="o">{</span>
-    <span class="kt">long</span> <span class="n">newSum</span> <span class="o">=</span> <span class="n">b1</span><span class="o">.</span><span class="na">getSum</span><span class="o">()</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="na">getSum</span><span class="o">();</span>
-    <span class="kt">long</span> <span class="n">newCount</span> <span class="o">=</span> <span class="n">b1</span><span class="o">.</span><span class="na">getCount</span><span class="o">()</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="na">getCount</span><span class="o">();</span>
-    <span class="k">return</span> <span class="k">new</span> <span class="n">Average</span><span class="o">(</span><span class="n">newSum</span><span class="o">,</span> <span class="n">newCount</span><span class="o">);</span>
+    <span class="kt">long</span> <span class="n">mergedSum</span> <span class="o">=</span> <span class="n">b1</span><span class="o">.</span><span class="na">getSum</span><span class="o">()</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="na">getSum</span><span class="o">();</span>
+    <span class="kt">long</span> <span class="n">mergedCount</span> <span class="o">=</span> <span class="n">b1</span><span class="o">.</span><span class="na">getCount</span><span class="o">()</span> <span class="o">+</span> <span class="n">b2</span><span class="o">.</span><span class="na">getCount</span><span class="o">();</span>
+    <span class="n">b1</span><span class="o">.</span><span class="na">setSum</span><span class="o">(</span><span class="n">mergedSum</span><span class="o">);</span>
+    <span class="n">b1</span><span class="o">.</span><span class="na">setCount</span><span class="o">(</span><span class="n">mergedCount</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">b1</span><span class="o">;</span>
   <span class="o">}</span>
   <span class="c1">// Transform the output of the reduction</span>
   <span class="kd">public</span> <span class="n">Double</span> <span class="nf">finish</span><span class="o">(</span><span class="n">Average</span> <span class="n">reduction</span><span class="o">)</span> <span class="o">{</span>
