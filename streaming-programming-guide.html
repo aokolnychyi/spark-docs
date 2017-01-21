@@ -1319,6 +1319,22 @@ For example (in Scala),</p>
 <span class="o">}</span></code></pre></figure>
 
   </div>
+<div data-lang="java">
+
+    <figure class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="n">dstream</span><span class="o">.</span><span class="na">foreachRDD</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">rdd</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">final</span> <span class="n">Connection</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">createNewConnection</span><span class="o">();</span> <span class="c1">// executed at the driver</span>
+    <span class="n">rdd</span><span class="o">.</span><span class="na">foreach</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;()</span> <span class="o">{</span>
+      <span class="nd">@Override</span>
+      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">String</span> <span class="n">record</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">record</span><span class="o">);</span> <span class="c1">// executed at the worker</span>
+      <span class="o">}</span>
+    <span class="o">});</span>
+  <span class="o">}</span>
+<span class="o">});</span></code></pre></figure>
+
+  </div>
 <div data-lang="python">
 
     <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="k">def</span> <span class="nf">sendRecord</span><span class="p">(</span><span class="n">rdd</span><span class="p">):</span>
@@ -1352,6 +1368,23 @@ For example,</p>
 <span class="o">}</span></code></pre></figure>
 
   </div>
+<div data-lang="java">
+
+    <figure class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="n">dstream</span><span class="o">.</span><span class="na">foreachRDD</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">rdd</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">rdd</span><span class="o">.</span><span class="na">foreach</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;()</span> <span class="o">{</span>
+      <span class="nd">@Override</span>
+      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">String</span> <span class="n">record</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Connection</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">createNewConnection</span><span class="o">();</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">record</span><span class="o">);</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+      <span class="o">}</span>
+    <span class="o">});</span>
+  <span class="o">}</span>
+<span class="o">});</span></code></pre></figure>
+
+  </div>
 <div data-lang="python">
 
     <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="k">def</span> <span class="nf">sendRecord</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
@@ -1380,6 +1413,25 @@ partition using that connection.</p>
     <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="o">()</span>
   <span class="o">}</span>
 <span class="o">}</span></code></pre></figure>
+
+  </div>
+<div data-lang="java">
+
+    <figure class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="n">dstream</span><span class="o">.</span><span class="na">foreachRDD</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">rdd</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">rdd</span><span class="o">.</span><span class="na">foreachPartition</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+      <span class="nd">@Override</span>
+      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">partitionOfRecords</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Connection</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">createNewConnection</span><span class="o">();</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">partitionOfRecords</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+          <span class="n">connection</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">partitionOfRecords</span><span class="o">.</span><span class="na">next</span><span class="o">());</span>
+        <span class="o">}</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+      <span class="o">}</span>
+    <span class="o">});</span>
+  <span class="o">}</span>
+<span class="o">});</span></code></pre></figure>
 
   </div>
 <div data-lang="python">
@@ -1415,6 +1467,26 @@ RDDs of multiple batches are pushed to the external system, thus further reducin
 
   </div>
 
+<div data-lang="java">
+
+    <figure class="highlight"><pre><code class="language-java" data-lang="java"><span></span><span class="n">dstream</span><span class="o">.</span><span class="na">foreachRDD</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">rdd</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">rdd</span><span class="o">.</span><span class="na">foreachPartition</span><span class="o">(</span><span class="k">new</span> <span class="n">VoidFunction</span><span class="o">&lt;</span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+      <span class="nd">@Override</span>
+      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">partitionOfRecords</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// ConnectionPool is a static, lazily initialized pool of connections</span>
+        <span class="n">Connection</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">ConnectionPool</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">partitionOfRecords</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+          <span class="n">connection</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">partitionOfRecords</span><span class="o">.</span><span class="na">next</span><span class="o">());</span>
+        <span class="o">}</span>
+        <span class="n">ConnectionPool</span><span class="o">.</span><span class="na">returnConnection</span><span class="o">(</span><span class="n">connection</span><span class="o">);</span> <span class="c1">// return to the pool for future reuse</span>
+      <span class="o">}</span>
+    <span class="o">});</span>
+  <span class="o">}</span>
+<span class="o">});</span></code></pre></figure>
+
+  </div>
 <div data-lang="python">
 
     <figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="k">def</span> <span class="nf">sendPartition</span><span class="p">(</span><span class="nb">iter</span><span class="p">):</span>

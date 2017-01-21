@@ -188,7 +188,7 @@ OpenJDK 64-Bit Server VM warning: Try increasing the code cache size using -XX:R
 
 <p>Spark now comes packaged with a self-contained Maven installation to ease building and deployment of Spark from source located under the <code>build/</code> directory. This script will automatically download and setup all necessary build requirements (<a href="https://maven.apache.org/">Maven</a>, <a href="http://www.scala-lang.org/">Scala</a>, and <a href="https://github.com/typesafehub/zinc">Zinc</a>) locally within the <code>build/</code> directory itself. It honors any <code>mvn</code> binary if present already, however, will pull down its own copy of Scala and Zinc regardless to ensure proper version requirements are met. <code>build/mvn</code> execution acts as a pass through to the <code>mvn</code> call allowing easy transition from previous build methods. As an example, one can build a version of Spark as follows:</p>
 
-<pre><code>./build/mvn -Pyarn -Phadoop-2.4 -Dhadoop.version=2.4.0 -DskipTests clean package
+<pre><code>./build/mvn -Pyarn -Phadoop-2.7 -Dhadoop.version=2.7.0 -DskipTests clean package
 </code></pre>
 
 <p>Other build examples can be found below.</p>
@@ -200,10 +200,10 @@ OpenJDK 64-Bit Server VM warning: Try increasing the code cache size using -XX:R
 to be runnable, use <code>./dev/make-distribution.sh</code> in the project root directory. It can be configured
 with Maven profile settings and so on like the direct Maven build. Example:</p>
 
-<pre><code>./dev/make-distribution.sh --name custom-spark --tgz -Psparkr -Phadoop-2.4 -Phive -Phive-thriftserver -Pmesos -Pyarn
+<pre><code>./dev/make-distribution.sh --name custom-spark --pip --r --tgz -Psparkr -Phadoop-2.7 -Phive -Phive-thriftserver -Pmesos -Pyarn
 </code></pre>
 
-<p>For more information on usage, run <code>./dev/make-distribution.sh --help</code></p>
+<p>This will build Spark distribution along with Python pip and R packages. For more information on usage, run <code>./dev/make-distribution.sh --help</code></p>
 
 <h2 id="specifying-the-hadoop-version">Specifying the Hadoop Version</h2>
 
@@ -222,7 +222,7 @@ with Maven profile settings and so on like the direct Maven build. Example:</p>
   </tbody>
 </table>
 
-<p>Note that support for versions of Hadoop before 2.6 are deprecated as of Spark 2.1.0 and may be 
+<p>Note that support for versions of Hadoop before 2.6 are deprecated as of Spark 2.1.0 and may be
 removed in Spark 2.2.0.</p>
 
 <p>You can enable the <code>yarn</code> profile and optionally set the <code>yarn.version</code> property if it is different from <code>hadoop.version</code>. Spark only supports YARN versions 2.2.0 and later.</p>
@@ -436,6 +436,8 @@ If you have JDK 8 installed but it is not the system default, you can set JAVA_H
 </code></pre>
 
 <p><strong>Note:</strong> Due to packaging requirements you can not directly pip install from the Python directory, rather you must first build the sdist package as described above.</p>
+
+<p>Alternatively, you can also run make-distribution with the &#8211;pip option.</p>
 
 <h2 id="pyspark-tests-with-maven">PySpark Tests with Maven</h2>
 

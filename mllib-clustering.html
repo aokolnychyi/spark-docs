@@ -1162,11 +1162,6 @@ The implementation in MLlib has the following parameters:</p>
 <span class="c1"># Evaluate clustering</span>
 <span class="n">cost</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">computeCost</span><span class="p">(</span><span class="n">parsedData</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Bisecting K-means Cost = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cost</span><span class="p">))</span>
-
-<span class="c1"># Save and load model</span>
-<span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;target/org/apache/spark/PythonBisectingKMeansExample/BisectingKMeansModel&quot;</span>
-<span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-<span class="n">sameModel</span> <span class="o">=</span> <span class="n">BisectingKMeansModel</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 </pre></div>
     <div><small>Find full example code at "examples/src/main/python/mllib/bisecting_k_means_example.py" in the Spark repo.</small></div>
   </div>

@@ -501,7 +501,7 @@ and generates a <code>LDAModel</code> as the base model. Expert users may cast a
 <span class="k">val</span> <span class="n">ll</span> <span class="k">=</span> <span class="n">model</span><span class="o">.</span><span class="n">logLikelihood</span><span class="o">(</span><span class="n">dataset</span><span class="o">)</span>
 <span class="k">val</span> <span class="n">lp</span> <span class="k">=</span> <span class="n">model</span><span class="o">.</span><span class="n">logPerplexity</span><span class="o">(</span><span class="n">dataset</span><span class="o">)</span>
 <span class="n">println</span><span class="o">(</span><span class="s">s&quot;The lower bound on the log likelihood of the entire corpus: </span><span class="si">$ll</span><span class="s">&quot;</span><span class="o">)</span>
-<span class="n">println</span><span class="o">(</span><span class="s">s&quot;The upper bound bound on perplexity: </span><span class="si">$lp</span><span class="s">&quot;</span><span class="o">)</span>
+<span class="n">println</span><span class="o">(</span><span class="s">s&quot;The upper bound on perplexity: </span><span class="si">$lp</span><span class="s">&quot;</span><span class="o">)</span>
 
 <span class="c1">// Describe topics.</span>
 <span class="k">val</span> <span class="n">topics</span> <span class="k">=</span> <span class="n">model</span><span class="o">.</span><span class="n">describeTopics</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span>
@@ -536,7 +536,7 @@ and generates a <code>LDAModel</code> as the base model. Expert users may cast a
 <span class="kt">double</span> <span class="n">ll</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="na">logLikelihood</span><span class="o">(</span><span class="n">dataset</span><span class="o">);</span>
 <span class="kt">double</span> <span class="n">lp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="na">logPerplexity</span><span class="o">(</span><span class="n">dataset</span><span class="o">);</span>
 <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;The lower bound on the log likelihood of the entire corpus: &quot;</span> <span class="o">+</span> <span class="n">ll</span><span class="o">);</span>
-<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;The upper bound bound on perplexity: &quot;</span> <span class="o">+</span> <span class="n">lp</span><span class="o">);</span>
+<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;The upper bound on perplexity: &quot;</span> <span class="o">+</span> <span class="n">lp</span><span class="o">);</span>
 
 <span class="c1">// Describe topics.</span>
 <span class="n">Dataset</span><span class="o">&lt;</span><span class="n">Row</span><span class="o">&gt;</span> <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="na">describeTopics</span><span class="o">(</span><span class="mi">3</span><span class="o">);</span>
@@ -566,7 +566,7 @@ and generates a <code>LDAModel</code> as the base model. Expert users may cast a
 <span class="n">ll</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">logLikelihood</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 <span class="n">lp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">logPerplexity</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;The lower bound on the log likelihood of the entire corpus: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ll</span><span class="p">))</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The upper bound bound on perplexity: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lp</span><span class="p">))</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The upper bound on perplexity: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lp</span><span class="p">))</span>
 
 <span class="c1"># Describe topics.</span>
 <span class="n">topics</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">describeTopics</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>

@@ -160,6 +160,7 @@
       </li>
       <li><a href="#json-datasets" id="markdown-toc-json-datasets">JSON Datasets</a></li>
       <li><a href="#hive-tables" id="markdown-toc-hive-tables">Hive Tables</a>        <ul>
+          <li><a href="#specifying-storage-format-for-hive-tables" id="markdown-toc-specifying-storage-format-for-hive-tables">Specifying storage format for Hive tables</a></li>
           <li><a href="#interacting-with-different-versions-of-hive-metastore" id="markdown-toc-interacting-with-different-versions-of-hive-metastore">Interacting with Different Versions of Hive Metastore</a></li>
         </ul>
       </li>
@@ -974,10 +975,7 @@ reflection and become the names of the columns. Case classes can also be nested 
 types such as <code>Seq</code>s or <code>Array</code>s. This RDD can be implicitly converted to a DataFrame and then be
 registered as a table. Tables can be used in subsequent SQL statements.</p>
 
-    <div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.apache.spark.sql.catalyst.encoders.ExpressionEncoder</span>
-<span class="k">import</span> <span class="nn">org.apache.spark.sql.Encoder</span>
-
-<span class="c1">// For implicit conversions from RDDs to DataFrames</span>
+    <div class="highlight"><pre><span></span><span class="c1">// For implicit conversions from RDDs to DataFrames</span>
 <span class="k">import</span> <span class="nn">spark.implicits._</span>
 
 <span class="c1">// Create an RDD of Person objects from a text file, convert it to a Dataframe</span>
@@ -1844,21 +1842,27 @@ new data.</p>
 <h3 id="saving-to-persistent-tables">Saving to Persistent Tables</h3>
 
 <p><code>DataFrames</code> can also be saved as persistent tables into Hive metastore using the <code>saveAsTable</code>
-command. Notice existing Hive deployment is not necessary to use this feature. Spark will create a
+command. Notice that an existing Hive deployment is not necessary to use this feature. Spark will create a
 default local Hive metastore (using Derby) for you. Unlike the <code>createOrReplaceTempView</code> command,
 <code>saveAsTable</code> will materialize the contents of the DataFrame and create a pointer to the data in the
 Hive metastore. Persistent tables will still exist even after your Spark program has restarted, as
 long as you maintain your connection to the same metastore. A DataFrame for a persistent table can
 be created by calling the <code>table</code> method on a <code>SparkSession</code> with the name of the table.</p>
 
-<p>By default <code>saveAsTable</code> will create a &#8220;managed table&#8221;, meaning that the location of the data will
-be controlled by the metastore. Managed tables will also have their data deleted automatically
-when a table is dropped.</p>
+<p>For file-based data source, e.g. text, parquet, json, etc. you can specify a custom table path via the
+<code>path</code> option, e.g. <code>df.write.option("path", "/some/path").saveAsTable("t")</code>. When the table is dropped,
+the custom table path will not be removed and the table data is still there. If no custom table path is
+specifed, Spark will write data to a default table path under the warehouse directory. When the table is
+dropped, the default table path will be removed too.</p>
 
-<p>Currently, <code>saveAsTable</code> does not expose an API supporting the creation of an &#8220;External table&#8221; from a <code>DataFrame</code>, 
-however, this functionality can be achieved by providing a <code>path</code> option to the <code>DataFrameWriter</code> with <code>path</code> as the key 
-and location of the external table as its value (String) when saving the table with <code>saveAsTable</code>. When an External table 
-is dropped only its metadata is removed.</p>
+<p>Starting from Spark 2.1, persistent datasource tables have per-partition metadata stored in the Hive metastore. This brings several benefits:</p>
+
+<ul>
+  <li>Since the metastore can return only necessary partitions for a query, discovering all the partitions on the first query to the table is no longer needed.</li>
+  <li>Hive DDLs such as <code>ALTER TABLE PARTITION ... SET LOCATION</code> are now available for tables created with the Datasource API.</li>
+</ul>
+
+<p>Note that partition information is not gathered by default when creating external datasource tables (those with a <code>path</code> option). To sync the partition information in the metastore, you can invoke <code>MSCK REPAIR TABLE</code>.</p>
 
 <h2 id="parquet-files">Parquet Files</h2>
 
@@ -2610,13 +2614,15 @@ You may need to grant write privilege to the user who starts the Spark applicati
 <div class="codetabs">
 
 <div data-lang="scala">
-    <div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">org.apache.spark.sql.Row</span>
+    <div class="highlight"><pre><span></span><span class="k">import</span> <span class="nn">java.io.File</span>
+
+<span class="k">import</span> <span class="nn">org.apache.spark.sql.Row</span>
 <span class="k">import</span> <span class="nn">org.apache.spark.sql.SparkSession</span>
 
 <span class="k">case</span> <span class="k">class</span> <span class="nc">Record</span><span class="o">(</span><span class="n">key</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">value</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
 
 <span class="c1">// warehouseLocation points to the default location for managed databases and tables</span>
-<span class="k">val</span> <span class="n">warehouseLocation</span> <span class="k">=</span> <span class="s">&quot;spark-warehouse&quot;</span>
+<span class="k">val</span> <span class="n">warehouseLocation</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="s">&quot;spark-warehouse&quot;</span><span class="o">).</span><span class="n">getAbsolutePath</span>
 
 <span class="k">val</span> <span class="n">spark</span> <span class="k">=</span> <span class="nc">SparkSession</span>
   <span class="o">.</span><span class="n">builder</span><span class="o">()</span>
@@ -2628,7 +2634,7 @@ You may need to grant write privilege to the user who starts the Spark applicati
 <span class="k">import</span> <span class="nn">spark.implicits._</span>
 <span class="k">import</span> <span class="nn">spark.sql</span>
 
-<span class="n">sql</span><span class="o">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING)&quot;</span><span class="o">)</span>
+<span class="n">sql</span><span class="o">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive&quot;</span><span class="o">)</span>
 <span class="n">sql</span><span class="o">(</span><span class="s">&quot;LOAD DATA LOCAL INPATH &#39;examples/src/main/resources/kv1.txt&#39; INTO TABLE src&quot;</span><span class="o">)</span>
 
 <span class="c1">// Queries are expressed in HiveQL</span>
@@ -2683,7 +2689,8 @@ You may need to grant write privilege to the user who starts the Spark applicati
   </div>
 
 <div data-lang="java">
-    <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="o">;</span>
+    <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">java.io.File</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.io.Serializable</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
 
@@ -2715,7 +2722,7 @@ You may need to grant write privilege to the user who starts the Spark applicati
 <span class="o">}</span>
 
 <span class="c1">// warehouseLocation points to the default location for managed databases and tables</span>
-<span class="n">String</span> <span class="n">warehouseLocation</span> <span class="o">=</span> <span class="s">&quot;spark-warehouse&quot;</span><span class="o">;</span>
+<span class="n">String</span> <span class="n">warehouseLocation</span> <span class="o">=</span> <span class="k">new</span> <span class="n">File</span><span class="o">(</span><span class="s">&quot;spark-warehouse&quot;</span><span class="o">).</span><span class="na">getAbsolutePath</span><span class="o">();</span>
 <span class="n">SparkSession</span> <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span>
   <span class="o">.</span><span class="na">builder</span><span class="o">()</span>
   <span class="o">.</span><span class="na">appName</span><span class="o">(</span><span class="s">&quot;Java Spark Hive Example&quot;</span><span class="o">)</span>
@@ -2723,7 +2730,7 @@ You may need to grant write privilege to the user who starts the Spark applicati
   <span class="o">.</span><span class="na">enableHiveSupport</span><span class="o">()</span>
   <span class="o">.</span><span class="na">getOrCreate</span><span class="o">();</span>
 
-<span class="n">spark</span><span class="o">.</span><span class="na">sql</span><span class="o">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING)&quot;</span><span class="o">);</span>
+<span class="n">spark</span><span class="o">.</span><span class="na">sql</span><span class="o">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive&quot;</span><span class="o">);</span>
 <span class="n">spark</span><span class="o">.</span><span class="na">sql</span><span class="o">(</span><span class="s">&quot;LOAD DATA LOCAL INPATH &#39;examples/src/main/resources/kv1.txt&#39; INTO TABLE src&quot;</span><span class="o">);</span>
 
 <span class="c1">// Queries are expressed in HiveQL</span>
@@ -2788,13 +2795,13 @@ You may need to grant write privilege to the user who starts the Spark applicati
   </div>
 
 <div data-lang="python">
-    <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">expanduser</span><span class="p">,</span> <span class="n">join</span>
+    <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">expanduser</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">abspath</span>
 
 <span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
 <span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">Row</span>
 
 <span class="c1"># warehouse_location points to the default location for managed databases and tables</span>
-<span class="n">warehouse_location</span> <span class="o">=</span> <span class="s1">&#39;spark-warehouse&#39;</span>
+<span class="n">warehouse_location</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;spark-warehouse&#39;</span><span class="p">)</span>
 
 <span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span> \
     <span class="o">.</span><span class="n">builder</span> \
@@ -2804,7 +2811,7 @@ You may need to grant write privilege to the user who starts the Spark applicati
     <span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
 
 <span class="c1"># spark is an existing SparkSession</span>
-<span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING)&quot;</span><span class="p">)</span>
+<span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive&quot;</span><span class="p">)</span>
 <span class="n">spark</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s2">&quot;LOAD DATA LOCAL INPATH &#39;examples/src/main/resources/kv1.txt&#39; INTO TABLE src&quot;</span><span class="p">)</span>
 
 <span class="c1"># Queries are expressed in HiveQL</span>
@@ -2862,7 +2869,7 @@ adds support for finding tables in the MetaStore and writing queries using HiveQ
 
     <div class="highlight"><pre><span></span><span class="c1"># enableHiveSupport defaults to TRUE</span>
 sparkR.session<span class="p">(</span>enableHiveSupport <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
-sql<span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING)&quot;</span><span class="p">)</span>
+sql<span class="p">(</span><span class="s">&quot;CREATE TABLE IF NOT EXISTS src (key INT, value STRING) USING hive&quot;</span><span class="p">)</span>
 sql<span class="p">(</span><span class="s">&quot;LOAD DATA LOCAL INPATH &#39;examples/src/main/resources/kv1.txt&#39; INTO TABLE src&quot;</span><span class="p">)</span>
 
 <span class="c1"># Queries can be expressed in HiveQL.</span>
@@ -2872,6 +2879,53 @@ results <span class="o">&lt;-</span> collect<span class="p">(</span>sql<span cla
 
   </div>
 </div>
+
+<h3 id="specifying-storage-format-for-hive-tables">Specifying storage format for Hive tables</h3>
+
+<p>When you create a Hive table, you need to define how this table should read/write data from/to file system,
+i.e. the &#8220;input format&#8221; and &#8220;output format&#8221;. You also need to define how this table should deserialize the data
+to rows, or serialize rows to data, i.e. the &#8220;serde&#8221;. The following options can be used to specify the storage
+format(&#8220;serde&#8221;, &#8220;input format&#8221;, &#8220;output format&#8221;), e.g. <code>CREATE TABLE src(id int) USING hive OPTIONS(fileFormat 'parquet')</code>.
+By default, we will read the table files as plain text. Note that, Hive storage handler is not supported yet when
+creating table, you can create a table using storage handler at Hive side, and use Spark SQL to read it.</p>
+
+<table class="table">
+  <tr><th>Property Name</th><th>Meaning</th></tr>
+  <tr>
+    <td><code>fileFormat</code></td>
+    <td>
+      A fileFormat is kind of a package of storage format specifications, including "serde", "input format" and
+      "output format". Currently we support 6 fileFormats: 'sequencefile', 'rcfile', 'orc', 'parquet', 'textfile' and 'avro'.
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>inputFormat, outputFormat</code></td>
+    <td>
+      These 2 options specify the name of a corresponding `InputFormat` and `OutputFormat` class as a string literal,
+      e.g. `org.apache.hadoop.hive.ql.io.orc.OrcInputFormat`. These 2 options must be appeared in pair, and you can not
+      specify them if you already specified the `fileFormat` option.
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>serde</code></td>
+    <td>
+      This option specifies the name of a serde class. When the `fileFormat` option is specified, do not specify this option
+      if the given `fileFormat` already include the information of serde. Currently "sequencefile", "textfile" and "rcfile"
+      don't include the serde information and you can use this option with these 3 fileFormats.
+    </td>
+  </tr>
+
+  <tr>
+    <td><code>fieldDelim, escapeDelim, collectionDelim, mapkeyDelim, lineDelim</code></td>
+    <td>
+      These options can only be used with "textfile" fileFormat. They define how to read delimited files into rows.
+    </td>
+  </tr>
+</table>
+
+<p>All other properties defined with <code>OPTIONS</code> will be regarded as Hive serde properties.</p>
 
 <h3 id="interacting-with-different-versions-of-hive-metastore">Interacting with Different Versions of Hive Metastore</h3>
 
@@ -3382,7 +3436,19 @@ single-node data frame notion in these languages.</p>
   </li>
   <li>Dataset and DataFrame API <code>unionAll</code> has been deprecated and replaced by <code>union</code></li>
   <li>Dataset and DataFrame API <code>explode</code> has been deprecated, alternatively, use <code>functions.explode()</code> with <code>select</code> or <code>flatMap</code></li>
-  <li>Dataset and DataFrame API <code>registerTempTable</code> has been deprecated and replaced by <code>createOrReplaceTempView</code></li>
+  <li>
+    <p>Dataset and DataFrame API <code>registerTempTable</code> has been deprecated and replaced by <code>createOrReplaceTempView</code></p>
+  </li>
+  <li>Changes to <code>CREATE TABLE ... LOCATION</code> behavior for Hive tables.
+    <ul>
+      <li>From Spark 2.0, <code>CREATE TABLE ... LOCATION</code> is equivalent to <code>CREATE EXTERNAL TABLE ... LOCATION</code>
+in order to prevent accidental dropping the existing data in the user-provided locations.
+That means, a Hive table created in Spark SQL with the user-specified location is always a Hive external table.
+Dropping external tables will not remove the data. Users are not allowed to specify the location for Hive managed tables.
+Note that this is different from the Hive behavior.</li>
+      <li>As a result, <code>DROP TABLE</code> statements on those tables will not remove the data.</li>
+    </ul>
+  </li>
 </ul>
 
 <h2 id="upgrading-from-spark-sql-15-to-16">Upgrading From Spark SQL 1.5 to 1.6</h2>

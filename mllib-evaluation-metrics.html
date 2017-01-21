@@ -579,13 +579,11 @@ data, and evaluate the performance of the algorithm by several binary evaluation
 
     <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyspark.mllib.classification</span> <span class="kn">import</span> <span class="n">LogisticRegressionWithLBFGS</span>
 <span class="kn">from</span> <span class="nn">pyspark.mllib.evaluation</span> <span class="kn">import</span> <span class="n">BinaryClassificationMetrics</span>
-<span class="kn">from</span> <span class="nn">pyspark.mllib.regression</span> <span class="kn">import</span> <span class="n">LabeledPoint</span>
+<span class="kn">from</span> <span class="nn">pyspark.mllib.util</span> <span class="kn">import</span> <span class="n">MLUtils</span>
 
 <span class="c1"># Several of the methods available in scala are currently missing from pyspark</span>
 <span class="c1"># Load training data in LIBSVM format</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">spark</span>\
-    <span class="o">.</span><span class="n">read</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;libsvm&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;data/mllib/sample_binary_classification_data.txt&quot;</span><span class="p">)</span>\
-    <span class="o">.</span><span class="n">rdd</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">LabeledPoint</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">MLUtils</span><span class="o">.</span><span class="n">loadLibSVMFile</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="s2">&quot;data/mllib/sample_binary_classification_data.txt&quot;</span><span class="p">)</span>
 
 <span class="c1"># Split data into training (60%) and test (40%)</span>
 <span class="n">training</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">randomSplit</span><span class="p">([</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>

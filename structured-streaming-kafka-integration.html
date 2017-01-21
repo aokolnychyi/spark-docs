@@ -350,7 +350,7 @@ application. See the <a href="#deploying">Deploying</a> subsection below.</p>
   <li><strong>group.id</strong>: Kafka source will create a unique group id for each query automatically.</li>
   <li><strong>auto.offset.reset</strong>: Set the source option <code>startingOffsets</code> to specify
  where to start instead. Structured Streaming manages which offsets are consumed internally, rather 
- than rely on the kafka Consumer to do it. This will ensure that no data is missed when when new 
+ than rely on the kafka Consumer to do it. This will ensure that no data is missed when new 
  topics/partitions are dynamically subscribed. Note that <code>startingOffsets</code> only applies when a new
  Streaming query is started, and that resuming will always pick up from where the query left off.</li>
   <li><strong>key.deserializer</strong>: Keys are always deserialized as byte arrays with ByteArrayDeserializer. Use 

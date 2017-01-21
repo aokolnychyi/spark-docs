@@ -684,12 +684,14 @@ both speed and statistical learning behavior.</p>
 <p><a href="api/scala/index.html#org.apache.spark.mllib.feature.ChiSqSelector"><code>ChiSqSelector</code></a> implements
 Chi-Squared feature selection. It operates on labeled data with categorical features. ChiSqSelector uses the
 <a href="https://en.wikipedia.org/wiki/Chi-squared_test">Chi-Squared test of independence</a> to decide which
-features to choose. It supports three selection methods: <code>numTopFeatures</code>, <code>percentile</code>, <code>fpr</code>:</p>
+features to choose. It supports five selection methods: <code>numTopFeatures</code>, <code>percentile</code>, <code>fpr</code>, <code>fdr</code>, <code>fwe</code>:</p>
 
 <ul>
   <li><code>numTopFeatures</code> chooses a fixed number of top features according to a chi-squared test. This is akin to yielding the features with the most predictive power.</li>
   <li><code>percentile</code> is similar to <code>numTopFeatures</code> but chooses a fraction of all features instead of a fixed number.</li>
-  <li><code>fpr</code> chooses all features whose p-value is below a threshold, thus controlling the false positive rate of selection.</li>
+  <li><code>fpr</code> chooses all features whose p-values are below a threshold, thus controlling the false positive rate of selection.</li>
+  <li><code>fdr</code> uses the <a href="https://en.wikipedia.org/wiki/False_discovery_rate#Benjamini.E2.80.93Hochberg_procedure">Benjamini-Hochberg procedure</a> to choose all features whose false discovery rate is below a threshold.</li>
+  <li><code>fwe</code> chooses all features whose p-values are below a threshold. The threshold is scaled by 1/numFeatures, thus controlling the family-wise error rate of selection.</li>
 </ul>
 
 <p>By default, the selection method is <code>numTopFeatures</code>, with the default number of top features set to 50.
